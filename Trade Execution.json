@@ -14,12 +14,12 @@
         },
         "options": {}
       },
-      "id": "6e893491-c3ed-4aaf-a57e-58c5d230e4ff",
+      "id": "5d60061d-a70f-4769-bab2-28fd72cff83a",
       "name": "Alpaca-get-account-info",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        -1488,
-        592
+        -3712,
+        288
       ],
       "executeOnce": true,
       "typeVersion": 4.2,
@@ -41,12 +41,12 @@
         "jsonBody": "={\n  \"symbol\": \"{{$json.symbol.replace('.US', '')}}\",\n  \"qty\": \"{{ Math.floor($json.qty || $json.trade_size || 1) }}\",\n  \"side\": \"sell\",\n  \"type\": \"market\",\n  \"time_in_force\": \"day\"\n}\n",
         "options": {}
       },
-      "id": "1072ac4f-c64d-45b5-b154-46bb90f3ebe3",
+      "id": "9d09f683-6b2b-4dbe-9822-c5d79fb23ef5",
       "name": "Alpaca-post-order-sell",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        992,
-        672
+        -1232,
+        368
       ],
       "typeVersion": 4.2,
       "credentials": {
@@ -72,12 +72,12 @@
         "jsonBody": "={\n  \"symbol\": \"{{$json.symbol.replace('.US', '')}}\",\n  \"qty\": \"{{ Math.floor($json.qty || $json.trade_size || 1) }}\",\n  \"side\": \"buy\",\n  \"type\": \"market\",\n  \"time_in_force\": \"day\"\n}\n",
         "options": {}
       },
-      "id": "8e7c2e38-9381-455a-9755-cf418e22a73f",
+      "id": "8c67b8ce-7f03-4f3f-8581-d455877d21cb",
       "name": "Alpaca-post-order-buy",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        992,
-        496
+        -1232,
+        192
       ],
       "typeVersion": 4.2,
       "credentials": {
@@ -91,12 +91,12 @@
       "parameters": {
         "jsCode": "// --- filter_top_sentiment_score in n8n ---\n// Convert sentimentalScore to number, filter & sort descending\n\n// 1️⃣ Define how many top results you want\nconst topN = 5;\n\n// 2️⃣ Clean, convert, and sort\nconst cleaned = items\n  .map(item => {\n    const score = Number(item.json.sentimentalScore);\n    return { ...item, json: { ...item.json, sentimentalScore: score } };\n  })\n  .filter(item => !isNaN(item.json.sentimentalScore)) // remove blanks or invalids\n  .sort((a, b) => b.json.sentimentalScore - a.json.sentimentalScore)\n  .slice(0, topN);\n\n// 3️⃣ Return top-scoring items\nreturn cleaned;\n"
       },
-      "id": "1204d7b5-7a47-4b93-b7a9-9a6c6d2fc9e9",
+      "id": "72f7647c-5409-4a76-b459-4d5fe7e4f429",
       "name": "filter_top_sentiment_score",
       "type": "n8n-nodes-base.code",
       "position": [
-        -624,
-        592
+        -2848,
+        288
       ],
       "typeVersion": 2
     },
@@ -127,12 +127,12 @@
         "combineFilters": "OR",
         "options": {}
       },
-      "id": "bac6b8a7-dd4e-4f9b-afa6-692e0a14e3d4",
+      "id": "7b923bda-1bee-4a3a-94f0-ec1ebd73eeb6",
       "name": "read_sentiments_score_today",
       "type": "n8n-nodes-base.googleSheets",
       "position": [
-        -928,
-        592
+        -3152,
+        288
       ],
       "typeVersion": 4.6,
       "credentials": {
@@ -206,12 +206,12 @@
           "useAppend": true
         }
       },
-      "id": "f1d8ce05-d78e-4ee6-a422-89ac02edabab",
+      "id": "8cd99b74-05f7-4514-9c65-b6e445a49ba7",
       "name": "write_account_balace_today",
       "type": "n8n-nodes-base.googleSheets",
       "position": [
-        -1200,
-        592
+        -3424,
+        288
       ],
       "typeVersion": 4.6,
       "credentials": {
@@ -235,12 +235,12 @@
           }
         }
       },
-      "id": "3c1de2a4-6ada-47be-8d28-08b2cafa52bc",
+      "id": "9a78e6c5-5e12-4854-8174-66ab056aeda0",
       "name": "Alpaca_get_open_positions",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        -160,
-        592
+        -2384,
+        288
       ],
       "executeOnce": true,
       "typeVersion": 4.2,
@@ -257,12 +257,12 @@
         "amount": 1,
         "unit": "minutes"
       },
-      "id": "73c4c0c0-9845-4981-a27c-c5746fd54a18",
+      "id": "0adabe59-4e04-4340-a53f-de3155f7e37e",
       "name": "Wait",
       "type": "n8n-nodes-base.wait",
       "position": [
-        1392,
-        576
+        -832,
+        272
       ],
       "webhookId": "3d1031f5-7a20-4c3a-8791-748e93830402",
       "typeVersion": 1.1
@@ -278,12 +278,12 @@
           ]
         }
       },
-      "id": "c702f488-e782-46b2-b8ed-ca50f25ac495",
+      "id": "a6f36038-386f-4646-9bc6-2ca35ff906ea",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "position": [
-        -1744,
-        592
+        -3968,
+        288
       ],
       "typeVersion": 1.2
     },
@@ -291,12 +291,12 @@
       "parameters": {
         "jsCode": "// --- SAFE ACCESS HELPERS ---\nfunction safeGet(nodeName) {\n  try {\n    const n = $node[nodeName];\n    if (!n) return [];\n    if (typeof n.all === \"function\") return n.all();\n    if (Array.isArray(n.json)) return n.json;\n    if (n.json) return [n.json];\n    return [];\n  } catch (e) {\n    console.log(`⚠️ Node \"${nodeName}\" not executed or empty`);\n    return [];\n  }\n}\n// -----------------------------------------------------------\n\n// 1️⃣ Gather data safely\nconst accountNode = safeGet(\"Alpaca-get-account-info\")[0]?.json || {};\nconst openPositionsRaw = safeGet(\"Alpaca_get_open_positions\");\nconst inputItems = $input.all();\n\n// 2️⃣ Normalize open positions from Alpaca\nconst openPositions = [];\nfor (const pos of openPositionsRaw) {\n  if (Array.isArray(pos.json?.body)) openPositions.push(...pos.json.body);\n  else if (pos.json?.symbol) openPositions.push(pos.json);\n}\nconst openSymbols = openPositions.map(p => p.symbol);\n\n// 3️⃣ Account info fallback\nconst availableCash = parseFloat(accountNode.cash ?? \"0\");\nconst equity = parseFloat(accountNode.equity ?? availableCash);\n\n// 4️⃣ Parameters\nconst MAX_ALLOCATION_PERCENT = 0.10;  // 10% per stock max\nconst MIN_SCORE_THRESHOLD = 0.5;      // min abs(score) to trade\n\nconst output = [];\n\nconsole.log(\"🧾 Incoming sentiment items:\", inputItems.length);\nconsole.log(\"💰 Account equity:\", equity, \"| Cash:\", availableCash);\nconsole.log(\"📦 Current holdings:\", openSymbols);\n\n// 5️⃣ Core logic\nfor (const item of inputItems) {\n  const symbol = item.json.stock || item.json.symbol;\n  const rawScore = (\n    item.json.sentimentalScore ??\n    item.json.sentimentScore ??\n    \"0\"\n  ).toString().trim();\n  const score = parseFloat(rawScore);\n\n  if (!symbol || isNaN(score)) {\n    console.log(`⚠️ Skipping invalid item:`, item.json);\n    continue;\n  }\n\n  const conviction = Math.max(0, (Math.abs(score) - MIN_SCORE_THRESHOLD) / (1.0 - MIN_SCORE_THRESHOLD));\n  const allocationPercent = MAX_ALLOCATION_PERCENT * conviction;\n  const notional = equity * allocationPercent;\n\n  let side = \"hold\"; // default action\n  let reason = \"\";\n\n  if (score >= MIN_SCORE_THRESHOLD && !openSymbols.includes(symbol)) {\n    side = \"buy\";\n    reason = \"Positive sentiment, not owned\";\n  } else if (score <= -MIN_SCORE_THRESHOLD && openSymbols.includes(symbol)) {\n    side = \"sell\";\n    reason = \"Negative sentiment, currently owned\";\n  } else {\n    reason = \"Hold condition (either weak sentiment or already aligned)\";\n  }\n\n  item.json.symbol = symbol;\n  item.json.sentimentScore = score;\n  item.json.side = side;\n  item.json.reason = reason;\n  item.json.notional = parseFloat(notional.toFixed(2));\n  item.json.allocationPercent = allocationPercent;\n\n  output.push(item);\n}\n\n// 6️⃣ Log summary\nconst buys = output.filter(i => i.json.side === \"buy\").map(i => i.json.symbol);\nconst sells = output.filter(i => i.json.side === \"sell\").map(i => i.json.symbol);\nconst holds = output.filter(i => i.json.side === \"hold\").map(i => i.json.symbol);\n\nconsole.log(`📈 BUY: ${buys.join(\", \") || \"None\"}`);\nconsole.log(`📉 SELL: ${sells.join(\", \") || \"None\"}`);\nconsole.log(`🤝 HOLD: ${holds.join(\", \") || \"None\"}`);\n\n// 7️⃣ Always return output (even if empty)\nif (output.length === 0) {\n  console.log(\"⚠️ No valid sentiment items received. Returning empty placeholder.\");\n  return [{ json: { message: \"No trades today\", side: \"none\" } }];\n}\n\nreturn output;\n"
       },
-      "id": "b82151bb-3082-4f1f-9d48-0711ba7487a4",
+      "id": "0a339d4c-05a5-48eb-bd2e-65111a5e90e9",
       "name": "Calculate_Trade_Size_and_Side",
       "type": "n8n-nodes-base.code",
       "position": [
-        -384,
-        592
+        -2608,
+        288
       ],
       "typeVersion": 2,
       "alwaysOutputData": false
@@ -308,22 +308,22 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        592
+        -2176,
+        288
       ],
-      "id": "aa06bdea-6e7d-4a6b-9e51-22212d88d11a",
+      "id": "eb10db63-69e9-4d2f-a980-1da83b6c3634",
       "name": "Normalize empty positions"
     },
     {
       "parameters": {
-        "jsCode": "// --- Create Positions to Open AND Close ---\n\n// 1️⃣ Get sentiment and Alpaca data safely\nconst topSentimentRaw = $(\"filter_top_sentiment_score\").all() || [];\nlet openPositions = $(\"Normalize empty positions\").all() || [];\nconst accountInfo = $(\"Alpaca-get-account-info\").first()?.json || {};\n\n// ✅ Helper\nconst getSymbol = (obj) => obj.json.symbol || obj.json.stock || \"\";\n\n// Deduplicate top sentiments\nconst topSentimentMap = new Map();\ntopSentimentRaw.forEach(item => {\n  const symbol = getSymbol(item);\n  if (symbol && !topSentimentMap.has(symbol)) {\n    const score = parseFloat(item.json.sentimentalScore || item.json.sentimentScore || \"0\");\n    topSentimentMap.set(symbol, { symbol, sentimentScore: score });\n  }\n});\nconst topSentiment = Array.from(topSentimentMap.values());\n\n// 2️⃣ Extract lists\nconst openSymbols = openPositions.map(p => p.json.symbol);\nconst availableCash = parseFloat(accountInfo.cash || \"0\");\n\n// --- POSITIONS TO CLOSE ---\nconst positions_to_close = openPositions\n  .filter(p => {\n    const symbol = p.json.symbol;\n    const s = topSentiment.find(x => x.symbol === symbol);\n    return !s || s.sentimentScore <= 0;\n  })\n  .map(p => ({\n    symbol: p.json.symbol,\n    qty: parseFloat(p.json.qty || \"0\"),\n    market_value: parseFloat(p.json.market_value || \"0\"),\n    action: \"close\",\n    reason: \"Negative or missing sentiment → close position\"\n  }));\n\n// --- POSITIONS TO OPEN ---\nconst positive = topSentiment.filter(s => s.sentimentScore > 0);\nlet newSymbols = positive.filter(s => !openSymbols.includes(s.symbol));\n\nif (openPositions.length === 0 && newSymbols.length === 0 && positive.length > 0)\n  newSymbols = positive.slice(0, 1);\n\nconst allocationFraction = 0.1;\nconst totalAllocation = availableCash * allocationFraction;\nconst valuePerSymbol = newSymbols.length > 0 ? totalAllocation / newSymbols.length : 0;\n\nconst positions_to_open = newSymbols.map(s => ({\n  symbol: s.symbol,\n  sentimentScore: s.sentimentScore,\n  market_value_per_symbol: parseFloat(valuePerSymbol.toFixed(2)),\n  action: \"open\",\n  reason: \"Positive sentiment → buy position\"\n}));\n\n// ✅ Log results\nconsole.log(\"✅ Positions to Open:\", positions_to_open);\nconsole.log(\"❌ Positions to Close:\", positions_to_close);\n\n// ✅ Return both in one object for SplitOut nodes\nreturn [{\n  json: {\n    positions_to_open,\n    positions_to_close\n  }\n}];\n"
+        "jsCode": "const topSentimentRaw = $(\"filter_top_sentiment_score\").all() || [];\nlet openPositions = $(\"Normalize empty positions\").all() || [];\nconst accountInfo = $(\"Alpaca-get-account-info\").first()?.json || {};\n\nconst getSymbol = (obj) => obj.json.symbol || obj.json.stock || \"\";\n\nconst topSentimentMap = new Map();\ntopSentimentRaw.forEach(item => {\n  const symbol = getSymbol(item);\n  if (symbol && !topSentimentMap.has(symbol)) {\n    const score = parseFloat(item.json.sentimentalScore || item.json.sentimentScore || \"0\");\n    topSentimentMap.set(symbol, { symbol, sentimentScore: score });\n  }\n});\nconst topSentiment = Array.from(topSentimentMap.values());\n\nconst openSymbols = openPositions.map(p => p.json.symbol);\nconst availableCash = parseFloat(accountInfo.cash || \"0\");\n\nconst positions_to_close = openPositions\n  .filter(p => {\n    const symbol = p.json.symbol;\n    const s = topSentiment.find(x => x.symbol === symbol);\n    return !s || s.sentimentScore <= 0;\n  })\n  .map(p => ({\n    symbol: p.json.symbol,\n    qty: parseFloat(p.json.qty || \"0\"),\n    market_value: parseFloat(p.json.market_value || \"0\"),\n    action: \"close\",\n    reason: \"Negative or missing sentiment → close position\"\n  }));\n\nconst positive = topSentiment.filter(s => s.sentimentScore > 0);\nlet newSymbols = positive.filter(s => !openSymbols.includes(s.symbol));\n\nif (openPositions.length === 0 && newSymbols.length === 0 && positive.length > 0)\n  newSymbols = positive.slice(0, 1);\n\nconst allocationFraction = 0.1;\nconst totalAllocation = availableCash * allocationFraction;\nconst valuePerSymbol = newSymbols.length > 0 ? totalAllocation / newSymbols.length : 0;\n\nconst positions_to_open = newSymbols.map(s => ({\n  symbol: s.symbol,\n  sentimentScore: s.sentimentScore,\n  market_value: parseFloat(valuePerSymbol.toFixed(2)),\n  action: \"open\",\n  reason: \"Positive sentiment → buy position\"\n}));\n\nconsole.log(\"✅ Positions to Open:\", positions_to_open);\nconsole.log(\"❌ Positions to Close:\", positions_to_close);\n\nreturn [{\n  json: {\n    positions_to_open,\n    positions_to_close\n  }\n}];\n"
       },
-      "id": "00152efa-4809-4489-9543-671b918eeac1",
+      "id": "cfc7657f-b741-4b25-aa13-123dde07eeb5",
       "name": "create_positions_to_close_and_positions_to_open",
       "type": "n8n-nodes-base.code",
       "position": [
-        256,
-        592
+        -1968,
+        288
       ],
       "typeVersion": 2
     },
@@ -334,10 +334,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        496
+        -1504,
+        192
       ],
-      "id": "5e3bac33-5375-49f1-85d0-5f07a302216d",
+      "id": "a53a36a4-0471-4bfa-8247-26f19d16a10b",
       "name": "position_to_open"
     },
     {
@@ -347,23 +347,23 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        672
+        -1504,
+        368
       ],
-      "id": "7f843d9e-ea3b-48b8-b7f1-f8654db4a0cc",
+      "id": "dfa7067d-c3f3-4670-8b1d-2f11156e86ef",
       "name": "position_to_close"
     },
     {
       "parameters": {
-        "jsCode": "const buyOrders = $(\"Alpaca-post-order-buy\").all() || [];\nconst sellOrders = $(\"Alpaca-post-order-sell\").all() || [];\n\nconst merged = [...buyOrders, ...sellOrders].map(item => {\n  const o = item.json || {};\n  return {\n    symbol: o.symbol || null,\n    side: o.side || \"unknown\",\n    qty: o.qty ? Number(o.qty) : null,\n    status: o.status || \"unknown\",\n    created_at: o.created_at || new Date().toISOString(),\n    id: o.id || null,\n  };\n});\n\nif (merged.length === 0) {\n  return [{ json: { message: \"No trades executed today\" } }];\n}\n\nreturn merged.map(m => ({ json: m }));\n"
+        "jsCode": "// ✅ Safely get node data only if executed\nfunction safeGet(nodeName) {\n  try {\n    const data = $(nodeName).all();\n    return Array.isArray(data) ? data : [];\n  } catch (e) {\n    return [];\n  }\n}\n\nconst buyOrders = safeGet(\"Alpaca-post-order-buy\");\nconst sellOrders = safeGet(\"Alpaca-post-order-sell\");\n\n// ✅ Merge and normalize\nconst merged = [...buyOrders, ...sellOrders].map(item => {\n  const o = item.json || {};\n  return {\n    symbol: o.symbol || null,\n    side: o.side || \"unknown\",\n    qty: o.qty ? Number(o.qty) : null,\n    status: o.status || \"unknown\",\n    created_at: o.created_at || new Date().toISOString(),\n    id: o.id || null,\n  };\n});\n\n// ✅ If no data found\nif (merged.length === 0) {\n  return [{ json: { message: \"No trades executed today\" } }];\n}\n\n// ✅ Return formatted results\nreturn merged.map(m => ({ json: m }));\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1616,
-        576
+        -608,
+        272
       ],
-      "id": "e4cf0af1-b775-4ff6-95ab-dc3d5bf1d3d3",
+      "id": "d8c0267e-6708-4ec3-b886-e7ea990cad2b",
       "name": "Merge"
     },
     {
@@ -375,10 +375,10 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2128,
-        656
+        -96,
+        352
       ],
-      "id": "c65a2f7b-51c0-4f5b-94df-6a23925de742",
+      "id": "259f398c-5717-49bd-8e64-1993be3412e8",
       "name": "Send a text message",
       "webhookId": "4ef808ef-8594-4dd5-9ae6-26c2f489af4d",
       "credentials": {
@@ -500,12 +500,12 @@
         },
         "options": {}
       },
-      "id": "5d1e4485-1aec-4a62-8071-7dab43dfb846",
+      "id": "644e1bf9-2fc9-4184-b2bf-2f1107a27ff1",
       "name": "Trade Log",
       "type": "n8n-nodes-base.googleSheets",
       "position": [
-        2192,
-        432
+        -32,
+        128
       ],
       "typeVersion": 4.6,
       "credentials": {
@@ -692,18 +692,13 @@
           }
         ]
       ]
-    },
-    "Send a text message": {
-      "main": [
-        []
-      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "876fd671-0b47-4057-b71a-7f169fbddf8a",
+  "versionId": "ce96d237-7543-44ed-8650-595def274249",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7e7d2b1057f5b6eb7d15a2d68b60cfd4ffbbcd0ea1e6f6366714fa6647466e53"
