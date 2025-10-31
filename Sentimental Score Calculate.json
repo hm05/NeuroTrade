@@ -101,17 +101,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
+          "value": "1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc",
           "mode": "list",
-          "cachedResultName": "Stocks",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
+          "cachedResultName": "NeuroTrade",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
+          "value": 1412780622,
           "mode": "list",
           "cachedResultName": "Account Log",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit#gid=1412780622"
         },
         "options": {}
       },
@@ -169,10 +169,10 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
+          "value": "1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc",
           "mode": "list",
-          "cachedResultName": "Stocks",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
+          "cachedResultName": "NeuroTrade",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -318,17 +318,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
+          "value": "1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc",
           "mode": "list",
-          "cachedResultName": "Stocks",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
+          "cachedResultName": "NeuroTrade",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1993603739,
+          "value": 74712803,
           "mode": "list",
           "cachedResultName": "Sentiment Log",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit#gid=1993603739"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit#gid=74712803"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -560,7 +560,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "87974656-59ba-449e-b048-c5726a41ab23",
+  "versionId": "fb6c189c-a56b-4843-9ee5-bed31829d882",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7e7d2b1057f5b6eb7d15a2d68b60cfd4ffbbcd0ea1e6f6366714fa6647466e53"

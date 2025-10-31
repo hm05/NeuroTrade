@@ -32,29 +32,20 @@
     },
     {
       "parameters": {
-        "method": "DELETE",
-        "url": "={{ $json.symbol ? \"https://paper-api.alpaca.markets/v2/positions/\" + $json.symbol : \"https://paper-api.alpaca.markets/v2/positions\" }}\n",
+        "method": "POST",
+        "url": "https://paper-api.alpaca.markets/v2/orders",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {}
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {}
-          ]
-        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"symbol\": \"{{$json.symbol.replace('.US', '')}}\",\n  \"qty\": \"{{ Math.floor($json.qty || $json.trade_size || 1) }}\",\n  \"side\": \"sell\",\n  \"type\": \"market\",\n  \"time_in_force\": \"day\"\n}\n",
         "options": {}
       },
       "id": "1072ac4f-c64d-45b5-b154-46bb90f3ebe3",
       "name": "Alpaca-post-order-sell",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        1120,
+        992,
         672
       ],
       "typeVersion": 4.2,
@@ -78,14 +69,14 @@
             {}
           ]
         },
-        "jsonBody": "={\n  \"symbol\": \"{{ $json.symbol.replace('.US', '') }}\",\n  \"notional\": {{ Number($json.market_value_per_symbol) }},\n  \"side\": \"buy\",\n  \"type\": \"market\",\n  \"time_in_force\": \"day\"\n}\n",
+        "jsonBody": "={\n  \"symbol\": \"{{$json.symbol.replace('.US', '')}}\",\n  \"qty\": \"{{ Math.floor($json.qty || $json.trade_size || 1) }}\",\n  \"side\": \"buy\",\n  \"type\": \"market\",\n  \"time_in_force\": \"day\"\n}\n",
         "options": {}
       },
       "id": "8e7c2e38-9381-455a-9755-cf418e22a73f",
       "name": "Alpaca-post-order-buy",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        1152,
+        992,
         496
       ],
       "typeVersion": 4.2,
@@ -113,17 +104,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
+          "value": "1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc",
           "mode": "list",
-          "cachedResultName": "Stocks",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
+          "cachedResultName": "NeuroTrade",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1993603739,
+          "value": 74712803,
           "mode": "list",
           "cachedResultName": "Sentiment Log",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit#gid=1993603739"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit#gid=74712803"
         },
         "filtersUI": {
           "values": [
@@ -134,9 +125,7 @@
           ]
         },
         "combineFilters": "OR",
-        "options": {
-          "returnFirstMatch": false
-        }
+        "options": {}
       },
       "id": "bac6b8a7-dd4e-4f9b-afa6-692e0a14e3d4",
       "name": "read_sentiments_score_today",
@@ -158,24 +147,24 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
+          "value": "1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc",
           "mode": "list",
-          "cachedResultName": "Stocks",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
+          "cachedResultName": "NeuroTrade",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
+          "value": 1412780622,
           "mode": "list",
           "cachedResultName": "Account Log",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit#gid=1412780622"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "date": "={{$today}}",
+            "date": "={{ $today }}",
             "balance": "={{ $json.equity }}",
-            "change": "={{($json.equity- $json.last_equity)/ $json.last_equity}}"
+            "change": "={{ ($json.equity- $json.last_equity)/ $json.last_equity }}"
           },
           "matchingColumns": [
             "date"
@@ -198,8 +187,7 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             },
             {
               "id": "change",
@@ -208,8 +196,7 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -267,15 +254,15 @@
     },
     {
       "parameters": {
-        "amount": 2,
+        "amount": 1,
         "unit": "minutes"
       },
       "id": "73c4c0c0-9845-4981-a27c-c5746fd54a18",
       "name": "Wait",
       "type": "n8n-nodes-base.wait",
       "position": [
-        944,
-        496
+        1392,
+        576
       ],
       "webhookId": "3d1031f5-7a20-4c3a-8791-748e93830402",
       "typeVersion": 1.1
@@ -368,171 +355,13 @@
     },
     {
       "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
-          "mode": "list",
-          "cachedResultName": "Stocks",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": 416202434,
-          "mode": "list",
-          "cachedResultName": "Trade Log",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit#gid=416202434"
-        },
-        "columns": {
-          "mappingMode": "autoMapInputData",
-          "value": {
-            "date": "={{ $today }}",
-            "order": "={{ $json.side }}",
-            "value": "={{ $if( $json.side == \"buy\",$json.notional,$('positions_to_close').item.json.market_value) }}",
-            "symbol": "={{ $json.symbol }}"
-          },
-          "matchingColumns": [
-            "date"
-          ],
-          "schema": [
-            {
-              "id": "date",
-              "displayName": "date",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "symbol",
-              "displayName": "symbol",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "order",
-              "displayName": "order",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "value",
-              "displayName": "value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "side",
-              "displayName": "side",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "qty",
-              "displayName": "qty",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "notional",
-              "displayName": "notional",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "created_at",
-              "displayName": "created_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "reason",
-              "displayName": "reason",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "id": "5d1e4485-1aec-4a62-8071-7dab43dfb846",
-      "name": "Google Sheets",
-      "type": "n8n-nodes-base.googleSheets",
-      "position": [
-        2192,
-        512
-      ],
-      "typeVersion": 4.6,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "B74O1vS6ljHUhodt",
-          "name": "Google Sheets account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// --- Combine Buy + Sell Order Results ---\n\nlet buyOrders = [];\nlet sellOrders = [];\n\n// 🛡️ Safe attempt to read data from previous nodes\ntry {\n  buyOrders = $(\"Alpaca-post-order-buy\").all() || [];\n} catch (e) {\n  buyOrders = [];\n}\n\ntry {\n  sellOrders = $(\"Alpaca-post-order-sell\").all() || [];\n} catch (e) {\n  sellOrders = [];\n}\n\n// 🧩 Merge both safely\nconst merged = [...buyOrders, ...sellOrders]\n  .map(item => {\n    const o = item.json || {};\n    return {\n      symbol: o.symbol || null,\n      side: o.side || (o.notional ? \"buy\" : \"sell\"),\n      qty: o.qty ? Number(o.qty) : null,\n      notional: o.notional ? Number(o.notional) : null,\n      status: o.status || \"unknown\",\n      created_at: o.created_at || new Date().toISOString(),\n      id: o.id || null,\n      reason: o.reason || \"\",\n    };\n  });\n\n// ✅ If no orders were placed\nif (merged.length === 0) {\n  return [{ json: { message: \"No trades executed today\" } }];\n}\n\n// ✅ Return final merged orders ready for Google Sheets\nreturn merged.map(m => ({ json: m }));\n"
+        "jsCode": "const buyOrders = $(\"Alpaca-post-order-buy\").all() || [];\nconst sellOrders = $(\"Alpaca-post-order-sell\").all() || [];\n\nconst merged = [...buyOrders, ...sellOrders].map(item => {\n  const o = item.json || {};\n  return {\n    symbol: o.symbol || null,\n    side: o.side || \"unknown\",\n    qty: o.qty ? Number(o.qty) : null,\n    status: o.status || \"unknown\",\n    created_at: o.created_at || new Date().toISOString(),\n    id: o.id || null,\n  };\n});\n\nif (merged.length === 0) {\n  return [{ json: { message: \"No trades executed today\" } }];\n}\n\nreturn merged.map(m => ({ json: m }));\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1552,
-        608
+        1616,
+        576
       ],
       "id": "e4cf0af1-b775-4ff6-95ab-dc3d5bf1d3d3",
       "name": "Merge"
@@ -540,14 +369,14 @@
     {
       "parameters": {
         "chatId": "7141060637",
-        "text": "={{$json[\"message\"]}}",
+        "text": "={{ \"Thank you for choosing NeuroTrade here is your trade summary.\" }}\n{{ \"Symbol:\" + \" \" + $json.symbol }} \n{{ \"Side:\" + \" \" + $json.side }}\n{{ \"Quantity:\" + \" \" + $json.qty }}\n{{ \"Placed at:\" + \" \" + $json.created_at }}",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2192,
-        736
+        2128,
+        656
       ],
       "id": "c65a2f7b-51c0-4f5b-94df-6a23925de742",
       "name": "Send a text message",
@@ -561,17 +390,130 @@
     },
     {
       "parameters": {
-        "language": "python",
-        "pythonCode": "from datetime import datetime\n\n# Try to convert items safely into a list of dicts\ntry:\n    input_items = [dict(i[\"json\"]) for i in _items]\nexcept Exception:\n    input_items = []\n\n# Handle empty data\nif not input_items:\n    output = [{\"json\": {\"message\": \"No trade data received\"}}]\n\n# Handle simple 'no trades' message\nelif len(input_items) == 1 and \"message\" in input_items[0]:\n    output = [{\"json\": {\"message\": input_items[0][\"message\"]}}]\n\nelse:\n    buy_count = 0\n    sell_count = 0\n    lines = []\n\n    for data in input_items:\n        symbol = data.get(\"symbol\", \"UNKNOWN\")\n        side = data.get(\"side\", \"unknown\").lower()\n        qty = data.get(\"qty\") or data.get(\"notional\") or \"N/A\"\n        status = data.get(\"status\", \"unknown\")\n        created_at = data.get(\"created_at\", \"\")\n\n        if created_at:\n            try:\n                created_at = datetime.fromisoformat(\n                    created_at.replace(\"Z\", \"+00:00\")\n                ).strftime(\"%Y-%m-%d %H:%M:%S\")\n            except Exception:\n                pass\n\n        if side == \"buy\":\n            buy_count += 1\n        elif side == \"sell\":\n            sell_count += 1\n\n        lines.append(\n            f\"• {symbol} — {side.upper()} — Qty: {qty} — {status}\"\n            + (f\" — {created_at}\" if created_at else \"\")\n        )\n\n    header = f\"📊 Trade Summary: {buy_count} Buy(s), {sell_count} Sell(s)\"\n    body = \"\\n\".join(lines) if lines else \"No detailed trades available.\"\n    message = f\"{header}\\n\\n{body}\"\n\n    output = [{\"json\": {\"message\": message}}]\n\nreturn output\n"
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc",
+          "mode": "list",
+          "cachedResultName": "NeuroTrade",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1325374813,
+          "mode": "list",
+          "cachedResultName": "Trade Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nE2KG_micCqfqu0SKxm7_u_j4NqelQEcj18FXEFr1mc/edit#gid=1325374813"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $today }}",
+            "symbol": "={{ $json.symbol }}",
+            "value": "={{ $json.qty && $json.price ? $json.qty * $json.price : 0 }}",
+            "qty": "={{ $json.qty || 0 }}",
+            "side": "={{ $json.side }}",
+            "status": "={{ $json.status || \"pending\" }}",
+            "created_at": "={{ $json.created_at || $now }}",
+            "id": "={{ $json.id || \"\" }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "symbol",
+              "displayName": "symbol",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "side",
+              "displayName": "side",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "qty",
+              "displayName": "qty",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "5d1e4485-1aec-4a62-8071-7dab43dfb846",
+      "name": "Trade Log",
+      "type": "n8n-nodes-base.googleSheets",
       "position": [
-        1936,
-        736
+        2192,
+        432
       ],
-      "id": "d1a1ec19-6ec6-4110-9975-5fc6e0a76dc8",
-      "name": "Telegram Message"
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "B74O1vS6ljHUhodt",
+          "name": "Google Sheets account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -580,7 +522,7 @@
       "main": [
         [
           {
-            "node": "Alpaca-post-order-buy",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -602,7 +544,7 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -613,7 +555,7 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -717,7 +659,7 @@
       "main": [
         [
           {
-            "node": "Wait",
+            "node": "Alpaca-post-order-buy",
             "type": "main",
             "index": 0
           }
@@ -739,21 +681,10 @@
       "main": [
         [
           {
-            "node": "Google Sheets",
+            "node": "Trade Log",
             "type": "main",
             "index": 0
           },
-          {
-            "node": "Telegram Message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Telegram Message": {
-      "main": [
-        [
           {
             "node": "Send a text message",
             "type": "main",
@@ -761,13 +692,18 @@
           }
         ]
       ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "9b59f6aa-c50e-48a7-86b0-591fe50cdca5",
+  "versionId": "876fd671-0b47-4057-b71a-7f169fbddf8a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7e7d2b1057f5b6eb7d15a2d68b60cfd4ffbbcd0ea1e6f6366714fa6647466e53"
