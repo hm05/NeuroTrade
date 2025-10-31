@@ -1,0 +1,570 @@
+{
+  "name": "Sentimental Score Calculate",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a stock sentiment analyzer. Your task is to evaluate news content for their potential impact on a specific stock.\n\nInput Format:\n    User input is in the following format:\n        Symbol: (The stock symbol also called ticker symbol)\n        title: (News headline that you have to analyze for sentiment of the given stock)\ncontent:(the content of the news to analyze)\nAnalysis Guidelines:\n    Evaluate how the news might affect the price of only the stock specified by the user in the input and generate a sentiment score between -1 and 1.\n    A score close to -1 indicates a strong negative impact, suggesting the news could significantly drive the stock price down.\n    A score near 0 represents a neutral impact, implying little to no effect on the stock price.\n    Conversely, a score close to 1 reflects a strong positive impact, likely driving the stock price up.\n    When generating the score, consider whether the news is surprising i.e., if it contains new information - or already priced in.\n    Explain in detail the rationale behind the score, highlighting why the news is positive, negative, or neutral for the given stock's price.\nOutput Format:\n    Return the result as JSON in the following format:\n\n        { symbol: (The stock symbol also called ticker symbol),\"sentiment_score\": (The sentiment score - float between -1 and 1), \"rationale\": (Your explanation for the score)}\nProvide the JSON output only. Do not include any other text.\n\nReal stock Symbol:\n{{$('loop_over_tickers').all()[0].json.ticker}}\n{{ $('join_articles_into_1').all()[0].json.fullString }}\n",
+        "options": {}
+      },
+      "id": "72e24303-90c8-48c5-a8b9-d35953b29a18",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1808,
+        1024
+      ],
+      "executeOnce": false,
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "maxOutputTokens": 2048
+        }
+      },
+      "id": "7beb42ba-f937-43bf-94fe-fdc5b1e847dd",
+      "name": "Google Gemini Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        1792,
+        1248
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MQe6FBPsPwsUurN0",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://eodhd.com/api/news",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "s",
+              "value": "={{ $json.ticker }}"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "fmt",
+              "value": "json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8fbeea6d-3a0d-45a5-9d61-43d8b2eb027f",
+      "name": "Get articles from EODHD",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        928,
+        928
+      ],
+      "executeOnce": false,
+      "typeVersion": 4.2,
+      "alwaysOutputData": false,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "KbjLDtSIUUOMtP62",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "27eed95f-920f-4436-8aaf-85d4c3dcedfd",
+      "name": "loop_over_tickers",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        576,
+        1056
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
+          "mode": "list",
+          "cachedResultName": "Stocks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Account Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "9bcfe2e7-1e1e-47aa-ae03-18eae841bede",
+      "name": "Read_tickers_from_Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        352,
+        1056
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "B74O1vS6ljHUhodt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "770d6272-1cde-44d7-9e15-fe5d7c28ba36",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $ifEmpty($input.all().toJsonString(),'True') }}",
+              "rightValue": "True"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "616f6094-d6e3-4ce4-acfe-33d8863a2f4a",
+      "name": "If_ticker_not_valid",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1152,
+        928
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
+          "mode": "list",
+          "cachedResultName": "Stocks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1993603739,
+          "mode": "list",
+          "cachedResultName": "Sentiment Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit#gid=1993603739"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{$today}}\n",
+            "sentimentScore": "Invaild Ticker",
+            "stock": "={{ $('loop_over_tickers').item.json.ticker }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "date",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "date",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stock",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "stock",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentimentScore",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "sentimentScore",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rational",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "rational",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "157dd9d2-4065-4155-a37f-b820180cfdfb",
+      "name": "Write_in_google_sheets_invalid_ticker",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1376,
+        832
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "B74O1vS6ljHUhodt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- n8n Code Node (JavaScript) ---\n// This script takes an array of objects and converts it into a single JSON string.\n\n// 1. Extract the JSON data from all incoming n8n items.\nconst allArticlesArray = items.map(item => item.json);\n\n// 2. Convert the entire array into a single JSON string.\n// The 'null, 2' arguments format the string with indentation for readability.\nconst combinedString = JSON.stringify(allArticlesArray, null, 2);\n\n// 3. Return the result as a single item.\n// The output will have one property, 'fullString', containing the combined text.\nreturn [\n  {\n    json: {\n      fullString: combinedString\n    }\n  }\n];"
+      },
+      "id": "66709056-dee1-42e3-b976-c37a780a9852",
+      "name": "join_articles_into_1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1376,
+        1024
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n// The input is an array of items. We'll work with the first item.\n\n\n// Access the string value from the 'output' field in the input JSON.\nconst rawStringWithMarkdown = item.json.output;\nconsole.log(item.json.output)\n// The JSON we want is nested inside a markdown code block (```json ... ```).\n// We need to extract just the JSON part.\n\n// Find the first occurrence of '{' to locate the start of the JSON object.\nconst jsonStartIndex = rawStringWithMarkdown.indexOf('{');\n\n// Find the last occurrence of '}' to locate the end of the JSON object.\nconst jsonEndIndex = rawStringWithMarkdown.lastIndexOf('}');\n\n// Slice the string from the start to the end to get only the clean JSON string.\n// We add +1 to jsonEndIndex because substring's second argument is exclusive.\nconst cleanJsonString = rawStringWithMarkdown.substring(jsonStartIndex, jsonEndIndex + 1);\n\n// Parse the cleaned string into a proper, usable JSON object.\nconst parsedJson = JSON.parse(cleanJsonString);\n\n// Return the parsed JSON object. The keys (symbol, sentiment_score, etc.)\n// will become individual fields in the n8n output for the next node to use.\nreturn parsedJson;}\n\n"
+      },
+      "id": "c2c0e10e-cd76-48f2-ba43-6a2148aa67e0",
+      "name": "format_output_as_json",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2368,
+        928
+      ],
+      "executeOnce": false,
+      "retryOnFail": false,
+      "typeVersion": 2,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "770d6272-1cde-44d7-9e15-fe5d7c28ba36",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "True"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0ebd62e8-34c0-439e-ab5d-d639d55237f4",
+      "name": "if_format_succesful",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2608,
+        1024
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU",
+          "mode": "list",
+          "cachedResultName": "Stocks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1993603739,
+          "mode": "list",
+          "cachedResultName": "Sentiment Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iqgeQS3H1f_Z1V7Gjh1F--TpFmDWt9owEEi4WC2OrEU/edit#gid=1993603739"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{$today}}",
+            "rational": "={{ $json.rationale }}",
+            "sentimentalScore": "={{ $json.sentiment_score }}",
+            "stock": "={{ $json.symbol || $json.stock || $item(0).$node[\"loop_over_tickers\"].json.ticker }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentimentalScore",
+              "displayName": "sentimentalScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rational",
+              "displayName": "rational",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "cfa244cc-c52a-41c5-ab9e-c3761ac1829b",
+      "name": "write_sentiment_to_sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3136,
+        1152
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "B74O1vS6ljHUhodt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 16
+            }
+          ]
+        }
+      },
+      "id": "ff2f2fa8-4547-45b5-95cd-f78618d15879",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        128,
+        1056
+      ],
+      "typeVersion": 1.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "format_output_as_json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read_tickers_from_Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "loop_over_tickers": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get articles from EODHD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If_ticker_not_valid": {
+      "main": [
+        [
+          {
+            "node": "Write_in_google_sheets_invalid_ticker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "join_articles_into_1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if_format_succesful": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "write_sentiment_to_sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "join_articles_into_1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format_output_as_json": {
+      "main": [
+        [
+          {
+            "node": "if_format_succesful",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get articles from EODHD": {
+      "main": [
+        [
+          {
+            "node": "If_ticker_not_valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read_tickers_from_Sheet": {
+      "main": [
+        [
+          {
+            "node": "loop_over_tickers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write_sentiment_to_sheets": {
+      "main": [
+        [
+          {
+            "node": "loop_over_tickers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "87974656-59ba-449e-b048-c5726a41ab23",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7e7d2b1057f5b6eb7d15a2d68b60cfd4ffbbcd0ea1e6f6366714fa6647466e53"
+  },
+  "id": "366wo4S1pheeGFLo",
+  "tags": []
+}
