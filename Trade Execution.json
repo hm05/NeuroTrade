@@ -33,7 +33,7 @@
     {
       "parameters": {
         "method": "DELETE",
-        "url": "={{ \"https://paper-api.alpaca.markets/v2/positions/\" + $json.symbol }}",
+        "url": "={{ $json.symbol ? \"https://paper-api.alpaca.markets/v2/positions/\" + $json.symbol : \"https://paper-api.alpaca.markets/v2/positions\" }}\n",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendQuery": true,
@@ -55,7 +55,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "position": [
         1120,
-        480
+        672
       ],
       "typeVersion": 4.2,
       "credentials": {
@@ -86,7 +86,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "position": [
         1152,
-        688
+        496
       ],
       "typeVersion": 4.2,
       "credentials": {
@@ -267,6 +267,107 @@
     },
     {
       "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "id": "73c4c0c0-9845-4981-a27c-c5746fd54a18",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        944,
+        496
+      ],
+      "webhookId": "3d1031f5-7a20-4c3a-8791-748e93830402",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 15,
+              "triggerAtMinute": {}
+            }
+          ]
+        }
+      },
+      "id": "c702f488-e782-46b2-b8ed-ca50f25ac495",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -1744,
+        592
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- SAFE ACCESS HELPERS ---\nfunction safeGet(nodeName) {\n  try {\n    const n = $node[nodeName];\n    if (!n) return [];\n    if (typeof n.all === \"function\") return n.all();\n    if (Array.isArray(n.json)) return n.json;\n    if (n.json) return [n.json];\n    return [];\n  } catch (e) {\n    console.log(`⚠️ Node \"${nodeName}\" not executed or empty`);\n    return [];\n  }\n}\n// -----------------------------------------------------------\n\n// 1️⃣ Gather data safely\nconst accountNode = safeGet(\"Alpaca-get-account-info\")[0]?.json || {};\nconst openPositionsRaw = safeGet(\"Alpaca_get_open_positions\");\nconst inputItems = $input.all();\n\n// 2️⃣ Normalize open positions from Alpaca\nconst openPositions = [];\nfor (const pos of openPositionsRaw) {\n  if (Array.isArray(pos.json?.body)) openPositions.push(...pos.json.body);\n  else if (pos.json?.symbol) openPositions.push(pos.json);\n}\nconst openSymbols = openPositions.map(p => p.symbol);\n\n// 3️⃣ Account info fallback\nconst availableCash = parseFloat(accountNode.cash ?? \"0\");\nconst equity = parseFloat(accountNode.equity ?? availableCash);\n\n// 4️⃣ Parameters\nconst MAX_ALLOCATION_PERCENT = 0.10;  // 10% per stock max\nconst MIN_SCORE_THRESHOLD = 0.5;      // min abs(score) to trade\n\nconst output = [];\n\nconsole.log(\"🧾 Incoming sentiment items:\", inputItems.length);\nconsole.log(\"💰 Account equity:\", equity, \"| Cash:\", availableCash);\nconsole.log(\"📦 Current holdings:\", openSymbols);\n\n// 5️⃣ Core logic\nfor (const item of inputItems) {\n  const symbol = item.json.stock || item.json.symbol;\n  const rawScore = (\n    item.json.sentimentalScore ??\n    item.json.sentimentScore ??\n    \"0\"\n  ).toString().trim();\n  const score = parseFloat(rawScore);\n\n  if (!symbol || isNaN(score)) {\n    console.log(`⚠️ Skipping invalid item:`, item.json);\n    continue;\n  }\n\n  const conviction = Math.max(0, (Math.abs(score) - MIN_SCORE_THRESHOLD) / (1.0 - MIN_SCORE_THRESHOLD));\n  const allocationPercent = MAX_ALLOCATION_PERCENT * conviction;\n  const notional = equity * allocationPercent;\n\n  let side = \"hold\"; // default action\n  let reason = \"\";\n\n  if (score >= MIN_SCORE_THRESHOLD && !openSymbols.includes(symbol)) {\n    side = \"buy\";\n    reason = \"Positive sentiment, not owned\";\n  } else if (score <= -MIN_SCORE_THRESHOLD && openSymbols.includes(symbol)) {\n    side = \"sell\";\n    reason = \"Negative sentiment, currently owned\";\n  } else {\n    reason = \"Hold condition (either weak sentiment or already aligned)\";\n  }\n\n  item.json.symbol = symbol;\n  item.json.sentimentScore = score;\n  item.json.side = side;\n  item.json.reason = reason;\n  item.json.notional = parseFloat(notional.toFixed(2));\n  item.json.allocationPercent = allocationPercent;\n\n  output.push(item);\n}\n\n// 6️⃣ Log summary\nconst buys = output.filter(i => i.json.side === \"buy\").map(i => i.json.symbol);\nconst sells = output.filter(i => i.json.side === \"sell\").map(i => i.json.symbol);\nconst holds = output.filter(i => i.json.side === \"hold\").map(i => i.json.symbol);\n\nconsole.log(`📈 BUY: ${buys.join(\", \") || \"None\"}`);\nconsole.log(`📉 SELL: ${sells.join(\", \") || \"None\"}`);\nconsole.log(`🤝 HOLD: ${holds.join(\", \") || \"None\"}`);\n\n// 7️⃣ Always return output (even if empty)\nif (output.length === 0) {\n  console.log(\"⚠️ No valid sentiment items received. Returning empty placeholder.\");\n  return [{ json: { message: \"No trades today\", side: \"none\" } }];\n}\n\nreturn output;\n"
+      },
+      "id": "b82151bb-3082-4f1f-9d48-0711ba7487a4",
+      "name": "Calculate_Trade_Size_and_Side",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -384,
+        592
+      ],
+      "typeVersion": 2,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Normalize Alpaca positions response safely ---\n\n// Get full input item\nconst item = $input.first();\n\n// Handle missing input gracefully\nif (!item || !item.json) {\n  return [{ json: { noPositions: true } }];\n}\n\nconst input = item.json;\n\n// If Alpaca returned full HTTP response with 'body'\nif (Array.isArray(input.body)) {\n  if (input.body.length === 0) {\n    // No open positions\n    return [{ json: { noPositions: true } }];\n  }\n  // Return each position as its own item\n  return input.body.map(pos => ({ json: pos }));\n}\n\n// If Alpaca returned array directly (not wrapped)\nif (Array.isArray(input)) {\n  if (input.length === 0) {\n    return [{ json: { noPositions: true } }];\n  }\n  return input.map(pos => ({ json: pos }));\n}\n\n// If there's a single position object\nreturn [{ json: input }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        592
+      ],
+      "id": "aa06bdea-6e7d-4a6b-9e51-22212d88d11a",
+      "name": "Normalize empty positions"
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Create Positions to Open AND Close ---\n\n// 1️⃣ Get sentiment and Alpaca data safely\nconst topSentimentRaw = $(\"filter_top_sentiment_score\").all() || [];\nlet openPositions = $(\"Normalize empty positions\").all() || [];\nconst accountInfo = $(\"Alpaca-get-account-info\").first()?.json || {};\n\n// ✅ Helper\nconst getSymbol = (obj) => obj.json.symbol || obj.json.stock || \"\";\n\n// Deduplicate top sentiments\nconst topSentimentMap = new Map();\ntopSentimentRaw.forEach(item => {\n  const symbol = getSymbol(item);\n  if (symbol && !topSentimentMap.has(symbol)) {\n    const score = parseFloat(item.json.sentimentalScore || item.json.sentimentScore || \"0\");\n    topSentimentMap.set(symbol, { symbol, sentimentScore: score });\n  }\n});\nconst topSentiment = Array.from(topSentimentMap.values());\n\n// 2️⃣ Extract lists\nconst openSymbols = openPositions.map(p => p.json.symbol);\nconst availableCash = parseFloat(accountInfo.cash || \"0\");\n\n// --- POSITIONS TO CLOSE ---\nconst positions_to_close = openPositions\n  .filter(p => {\n    const symbol = p.json.symbol;\n    const s = topSentiment.find(x => x.symbol === symbol);\n    return !s || s.sentimentScore <= 0;\n  })\n  .map(p => ({\n    symbol: p.json.symbol,\n    qty: parseFloat(p.json.qty || \"0\"),\n    market_value: parseFloat(p.json.market_value || \"0\"),\n    action: \"close\",\n    reason: \"Negative or missing sentiment → close position\"\n  }));\n\n// --- POSITIONS TO OPEN ---\nconst positive = topSentiment.filter(s => s.sentimentScore > 0);\nlet newSymbols = positive.filter(s => !openSymbols.includes(s.symbol));\n\nif (openPositions.length === 0 && newSymbols.length === 0 && positive.length > 0)\n  newSymbols = positive.slice(0, 1);\n\nconst allocationFraction = 0.1;\nconst totalAllocation = availableCash * allocationFraction;\nconst valuePerSymbol = newSymbols.length > 0 ? totalAllocation / newSymbols.length : 0;\n\nconst positions_to_open = newSymbols.map(s => ({\n  symbol: s.symbol,\n  sentimentScore: s.sentimentScore,\n  market_value_per_symbol: parseFloat(valuePerSymbol.toFixed(2)),\n  action: \"open\",\n  reason: \"Positive sentiment → buy position\"\n}));\n\n// ✅ Log results\nconsole.log(\"✅ Positions to Open:\", positions_to_open);\nconsole.log(\"❌ Positions to Close:\", positions_to_close);\n\n// ✅ Return both in one object for SplitOut nodes\nreturn [{\n  json: {\n    positions_to_open,\n    positions_to_close\n  }\n}];\n"
+      },
+      "id": "00152efa-4809-4489-9543-671b918eeac1",
+      "name": "create_positions_to_close_and_positions_to_open",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        256,
+        592
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Split positions_to_open array into individual items ---\nconst data = $input.first().json;\n\nif (!data.positions_to_open || !Array.isArray(data.positions_to_open) || data.positions_to_open.length === 0) {\n  return [{ json: { message: \"No positions to open\" } }];\n}\n\n// Split into multiple items\nreturn data.positions_to_open.map(item => ({ json: item }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        496
+      ],
+      "id": "5e3bac33-5375-49f1-85d0-5f07a302216d",
+      "name": "position_to_open"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nif (!data.positions_to_close || !Array.isArray(data.positions_to_close) || data.positions_to_close.length === 0) {\n  return [{ json: { message: \"No positions to close\" } }];\n}\nreturn data.positions_to_close.map(item => ({ json: item }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        672
+      ],
+      "id": "7f843d9e-ea3b-48b8-b7f1-f8654db4a0cc",
+      "name": "position_to_close"
+    },
+    {
+      "parameters": {
         "operation": "append",
         "documentId": {
           "__rl": true,
@@ -408,12 +509,12 @@
         },
         "options": {}
       },
-      "id": "54c5d53d-3c15-4fc9-a3cd-b18fa323eaf1",
+      "id": "5d1e4485-1aec-4a62-8071-7dab43dfb846",
       "name": "Google Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "position": [
-        1984,
-        592
+        2192,
+        512
       ],
       "typeVersion": 4.6,
       "credentials": {
@@ -425,117 +526,52 @@
     },
     {
       "parameters": {
-        "amount": 2,
-        "unit": "minutes"
-      },
-      "id": "73c4c0c0-9845-4981-a27c-c5746fd54a18",
-      "name": "Wait",
-      "type": "n8n-nodes-base.wait",
-      "position": [
-        944,
-        688
-      ],
-      "webhookId": "3d1031f5-7a20-4c3a-8791-748e93830402",
-      "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 15,
-              "triggerAtMinute": {}
-            }
-          ]
-        }
-      },
-      "id": "c702f488-e782-46b2-b8ed-ca50f25ac495",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "position": [
-        -1744,
-        592
-      ],
-      "typeVersion": 1.2
-    },
-    {
-      "parameters": {
-        "jsCode": "// --- SAFE ACCESS HELPERS ---\nfunction safeGet(nodeName) {\n  try {\n    const n = $node[nodeName];\n    if (!n) return [];\n    if (typeof n.all === \"function\") return n.all();\n    if (Array.isArray(n.json)) return n.json;\n    if (n.json) return [n.json];\n    return [];\n  } catch (e) {\n    console.log(`⚠️ Node \"${nodeName}\" not executed or empty`);\n    return [];\n  }\n}\n// -----------------------------------------------------------\n\n// 1️⃣ Gather data safely\nconst accountNode = safeGet(\"Alpaca-get-account-info\")[0]?.json || {};\nconst openPositionsRaw = safeGet(\"Alpaca_get_open_positions\");\nconst inputItems = $input.all();\n\n// 2️⃣ Normalize open positions from Alpaca\nconst openPositions = [];\nfor (const pos of openPositionsRaw) {\n  if (Array.isArray(pos.json?.body)) openPositions.push(...pos.json.body);\n  else if (pos.json?.symbol) openPositions.push(pos.json);\n}\nconst openSymbols = openPositions.map(p => p.symbol);\n\n// 3️⃣ Account info fallback\nconst availableCash = parseFloat(accountNode.cash ?? \"0\");\nconst equity = parseFloat(accountNode.equity ?? availableCash);\n\n// 4️⃣ Parameters\nconst MAX_ALLOCATION_PERCENT = 0.10;  // 10% per stock max\nconst MIN_SCORE_THRESHOLD = 0.5;      // min abs(score) to trade\n\nconst output = [];\n\nconsole.log(\"🧾 Incoming sentiment items:\", inputItems.length);\nconsole.log(\"💰 Account equity:\", equity, \"| Cash:\", availableCash);\nconsole.log(\"📦 Current holdings:\", openSymbols);\n\n// 5️⃣ Core logic\nfor (const item of inputItems) {\n  const symbol = item.json.stock || item.json.symbol;\n  const rawScore = (\n    item.json.sentimentalScore ??\n    item.json.sentimentScore ??\n    \"0\"\n  ).toString().trim();\n  const score = parseFloat(rawScore);\n\n  if (!symbol || isNaN(score)) {\n    console.log(`⚠️ Skipping invalid item:`, item.json);\n    continue;\n  }\n\n  const conviction = Math.max(0, (Math.abs(score) - MIN_SCORE_THRESHOLD) / (1.0 - MIN_SCORE_THRESHOLD));\n  const allocationPercent = MAX_ALLOCATION_PERCENT * conviction;\n  const notional = equity * allocationPercent;\n\n  let side = \"hold\"; // default action\n  let reason = \"\";\n\n  if (score >= MIN_SCORE_THRESHOLD && !openSymbols.includes(symbol)) {\n    side = \"buy\";\n    reason = \"Positive sentiment, not owned\";\n  } else if (score <= -MIN_SCORE_THRESHOLD && openSymbols.includes(symbol)) {\n    side = \"sell\";\n    reason = \"Negative sentiment, currently owned\";\n  } else {\n    reason = \"Hold condition (either weak sentiment or already aligned)\";\n  }\n\n  item.json.symbol = symbol;\n  item.json.sentimentScore = score;\n  item.json.side = side;\n  item.json.reason = reason;\n  item.json.notional = parseFloat(notional.toFixed(2));\n  item.json.allocationPercent = allocationPercent;\n\n  output.push(item);\n}\n\n// 6️⃣ Log summary\nconst buys = output.filter(i => i.json.side === \"buy\").map(i => i.json.symbol);\nconst sells = output.filter(i => i.json.side === \"sell\").map(i => i.json.symbol);\nconst holds = output.filter(i => i.json.side === \"hold\").map(i => i.json.symbol);\n\nconsole.log(`📈 BUY: ${buys.join(\", \") || \"None\"}`);\nconsole.log(`📉 SELL: ${sells.join(\", \") || \"None\"}`);\nconsole.log(`🤝 HOLD: ${holds.join(\", \") || \"None\"}`);\n\n// 7️⃣ Always return output (even if empty)\nif (output.length === 0) {\n  console.log(\"⚠️ No valid sentiment items received. Returning empty placeholder.\");\n  return [{ json: { message: \"No trades today\", side: \"none\" } }];\n}\n\nreturn output;\n"
-      },
-      "id": "b82151bb-3082-4f1f-9d48-0711ba7487a4",
-      "name": "Calculate_Trade_Size_and_Side",
-      "type": "n8n-nodes-base.code",
-      "position": [
-        -384,
-        592
-      ],
-      "typeVersion": 2,
-      "alwaysOutputData": false
-    },
-    {
-      "parameters": {
-        "jsCode": "// --- Normalize Alpaca positions response safely ---\n\n// Get full input item\nconst item = $input.first();\n\n// Handle missing input gracefully\nif (!item || !item.json) {\n  return [{ json: { noPositions: true } }];\n}\n\nconst input = item.json;\n\n// If Alpaca returned full HTTP response with 'body'\nif (Array.isArray(input.body)) {\n  if (input.body.length === 0) {\n    // No open positions\n    return [{ json: { noPositions: true } }];\n  }\n  // Return each position as its own item\n  return input.body.map(pos => ({ json: pos }));\n}\n\n// If Alpaca returned array directly (not wrapped)\nif (Array.isArray(input)) {\n  if (input.length === 0) {\n    return [{ json: { noPositions: true } }];\n  }\n  return input.map(pos => ({ json: pos }));\n}\n\n// If there's a single position object\nreturn [{ json: input }];\n"
+        "jsCode": "// --- Combine Buy + Sell Order Results ---\n\nlet buyOrders = [];\nlet sellOrders = [];\n\n// 🛡️ Safe attempt to read data from previous nodes\ntry {\n  buyOrders = $(\"Alpaca-post-order-buy\").all() || [];\n} catch (e) {\n  buyOrders = [];\n}\n\ntry {\n  sellOrders = $(\"Alpaca-post-order-sell\").all() || [];\n} catch (e) {\n  sellOrders = [];\n}\n\n// 🧩 Merge both safely\nconst merged = [...buyOrders, ...sellOrders]\n  .map(item => {\n    const o = item.json || {};\n    return {\n      symbol: o.symbol || null,\n      side: o.side || (o.notional ? \"buy\" : \"sell\"),\n      qty: o.qty ? Number(o.qty) : null,\n      notional: o.notional ? Number(o.notional) : null,\n      status: o.status || \"unknown\",\n      created_at: o.created_at || new Date().toISOString(),\n      id: o.id || null,\n      reason: o.reason || \"\",\n    };\n  });\n\n// ✅ If no orders were placed\nif (merged.length === 0) {\n  return [{ json: { message: \"No trades executed today\" } }];\n}\n\n// ✅ Return final merged orders ready for Google Sheets\nreturn merged.map(m => ({ json: m }));\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        592
+        1552,
+        608
       ],
-      "id": "aa06bdea-6e7d-4a6b-9e51-22212d88d11a",
-      "name": "Normalize empty positions"
-    },
-    {
-      "parameters": {
-        "jsCode": "// --- Create Positions to Open AND Close ---\n\n// 1️⃣ Get sentiment and Alpaca data safely\nconst topSentimentRaw = $(\"filter_top_sentiment_score\").all() || [];\nlet openPositions = $(\"Normalize empty positions\").all() || [];\nconst accountInfo = $(\"Alpaca-get-account-info\").first()?.json || {};\n\n// ✅ Helper\nconst getSymbol = (obj) => obj.json.symbol || obj.json.stock || \"\";\n\n// Deduplicate top sentiments\nconst topSentimentMap = new Map();\ntopSentimentRaw.forEach(item => {\n  const symbol = getSymbol(item);\n  if (symbol && !topSentimentMap.has(symbol)) {\n    const score = parseFloat(item.json.sentimentalScore || item.json.sentimentScore || \"0\");\n    topSentimentMap.set(symbol, { symbol, sentimentScore: score });\n  }\n});\nconst topSentiment = Array.from(topSentimentMap.values());\n\n// 2️⃣ Extract lists\nconst openSymbols = openPositions.map(p => p.json.symbol);\nconst availableCash = parseFloat(accountInfo.cash || \"0\");\n\n// --- POSITIONS TO CLOSE ---\nconst positions_to_close = openPositions\n  .filter(p => {\n    const symbol = p.json.symbol;\n    const s = topSentiment.find(x => x.symbol === symbol);\n    return !s || s.sentimentScore <= 0;\n  })\n  .map(p => ({\n    symbol: p.json.symbol,\n    qty: parseFloat(p.json.qty || \"0\"),\n    market_value: parseFloat(p.json.market_value || \"0\"),\n    action: \"close\",\n    reason: \"Negative or missing sentiment → close position\"\n  }));\n\n// --- POSITIONS TO OPEN ---\nconst positive = topSentiment.filter(s => s.sentimentScore > 0);\nlet newSymbols = positive.filter(s => !openSymbols.includes(s.symbol));\n\nif (openPositions.length === 0 && newSymbols.length === 0 && positive.length > 0)\n  newSymbols = positive.slice(0, 1);\n\nconst allocationFraction = 0.1;\nconst totalAllocation = availableCash * allocationFraction;\nconst valuePerSymbol = newSymbols.length > 0 ? totalAllocation / newSymbols.length : 0;\n\nconst positions_to_open = newSymbols.map(s => ({\n  symbol: s.symbol,\n  sentimentScore: s.sentimentScore,\n  market_value_per_symbol: parseFloat(valuePerSymbol.toFixed(2)),\n  action: \"open\",\n  reason: \"Positive sentiment → buy position\"\n}));\n\n// ✅ Log results\nconsole.log(\"✅ Positions to Open:\", positions_to_open);\nconsole.log(\"❌ Positions to Close:\", positions_to_close);\n\n// ✅ Return both in one object for SplitOut nodes\nreturn [{\n  json: {\n    positions_to_open,\n    positions_to_close\n  }\n}];\n"
-      },
-      "id": "00152efa-4809-4489-9543-671b918eeac1",
-      "name": "create_positions_to_close_and_positions_to_open",
-      "type": "n8n-nodes-base.code",
-      "position": [
-        256,
-        592
-      ],
-      "typeVersion": 2
-    },
-    {
-      "parameters": {
-        "jsCode": "// --- Split positions_to_open array into individual items ---\nconst data = $input.first().json;\n\nif (!data.positions_to_open || !Array.isArray(data.positions_to_open) || data.positions_to_open.length === 0) {\n  return [{ json: { message: \"No positions to open\" } }];\n}\n\n// Split into multiple items\nreturn data.positions_to_open.map(item => ({ json: item }));\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        720,
-        688
-      ],
-      "id": "5e3bac33-5375-49f1-85d0-5f07a302216d",
-      "name": "position_to_open"
-    },
-    {
-      "parameters": {
-        "jsCode": "const data = $input.first().json;\nif (!data.positions_to_close || !Array.isArray(data.positions_to_close) || data.positions_to_close.length === 0) {\n  return [{ json: { message: \"No positions to close\" } }];\n}\nreturn data.positions_to_close.map(item => ({ json: item }));\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        720,
-        480
-      ],
-      "id": "7f843d9e-ea3b-48b8-b7f1-f8654db4a0cc",
-      "name": "position_to_close"
-    },
-    {
-      "parameters": {
-        "jsCode": "// --- Combine Buy + Sell Order Results ---\n\nconst buyOrders = $(\"Alpaca-post-order-buy\").all() || [];\nconst sellOrders = $(\"Alpaca-post-order-sell\").all() || [];\n\nconst merged = [...buyOrders, ...sellOrders]\n  .map(item => {\n    const o = item.json || {};\n\n    return {\n      symbol: o.symbol || null,\n      side: o.side || (o.notional ? \"buy\" : \"sell\"),\n      qty: o.qty ? Number(o.qty) : null,\n      notional: o.notional ? Number(o.notional) : null,\n      status: o.status || \"unknown\",\n      created_at: o.created_at || new Date().toISOString(),\n      id: o.id || null,\n      reason: o.reason || \"\",\n    };\n  });\n\n// ✅ If no orders were placed\nif (merged.length === 0) {\n  return [{ json: { message: \"No trades executed today\" } }];\n}\n\n// ✅ Return final merged orders ready for Google Sheets\nreturn merged.map(m => ({ json: m }));\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1760,
-        592
-      ],
-      "id": "f876f24b-800d-41d7-ad0e-f4a6d9d15426",
+      "id": "e4cf0af1-b775-4ff6-95ab-dc3d5bf1d3d3",
       "name": "Merge"
+    },
+    {
+      "parameters": {
+        "chatId": "7141060637",
+        "text": "={{$json[\"message\"]}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2192,
+        736
+      ],
+      "id": "c65a2f7b-51c0-4f5b-94df-6a23925de742",
+      "name": "Send a text message",
+      "webhookId": "4ef808ef-8594-4dd5-9ae6-26c2f489af4d",
+      "credentials": {
+        "telegramApi": {
+          "id": "KvHDot48Cxvpmj3G",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from datetime import datetime\n\n# Try to convert items safely into a list of dicts\ntry:\n    input_items = [dict(i[\"json\"]) for i in _items]\nexcept Exception:\n    input_items = []\n\n# Handle empty data\nif not input_items:\n    output = [{\"json\": {\"message\": \"No trade data received\"}}]\n\n# Handle simple 'no trades' message\nelif len(input_items) == 1 and \"message\" in input_items[0]:\n    output = [{\"json\": {\"message\": input_items[0][\"message\"]}}]\n\nelse:\n    buy_count = 0\n    sell_count = 0\n    lines = []\n\n    for data in input_items:\n        symbol = data.get(\"symbol\", \"UNKNOWN\")\n        side = data.get(\"side\", \"unknown\").lower()\n        qty = data.get(\"qty\") or data.get(\"notional\") or \"N/A\"\n        status = data.get(\"status\", \"unknown\")\n        created_at = data.get(\"created_at\", \"\")\n\n        if created_at:\n            try:\n                created_at = datetime.fromisoformat(\n                    created_at.replace(\"Z\", \"+00:00\")\n                ).strftime(\"%Y-%m-%d %H:%M:%S\")\n            except Exception:\n                pass\n\n        if side == \"buy\":\n            buy_count += 1\n        elif side == \"sell\":\n            sell_count += 1\n\n        lines.append(\n            f\"• {symbol} — {side.upper()} — Qty: {qty} — {status}\"\n            + (f\" — {created_at}\" if created_at else \"\")\n        )\n\n    header = f\"📊 Trade Summary: {buy_count} Buy(s), {sell_count} Sell(s)\"\n    body = \"\\n\".join(lines) if lines else \"No detailed trades available.\"\n    message = f\"{header}\\n\\n{body}\"\n\n    output = [{\"json\": {\"message\": message}}]\n\nreturn output\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        736
+      ],
+      "id": "d1a1ec19-6ec6-4110-9975-5fc6e0a76dc8",
+      "name": "Telegram Message"
     }
   ],
   "pinData": {},
@@ -706,6 +742,22 @@
             "node": "Google Sheets",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -715,7 +767,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "598ee29b-d845-4b1d-8baf-0defc008cc7c",
+  "versionId": "9b59f6aa-c50e-48a7-86b0-591fe50cdca5",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7e7d2b1057f5b6eb7d15a2d68b60cfd4ffbbcd0ea1e6f6366714fa6647466e53"
