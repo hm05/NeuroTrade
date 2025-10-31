@@ -368,28 +368,6 @@
     },
     {
       "parameters": {
-        "chatId": "7141060637",
-        "text": "={{ \"Thank you for choosing NeuroTrade here is your trade summary.\" }}\n{{ \"Symbol:\" + \" \" + $json.symbol }} \n{{ \"Side:\" + \" \" + $json.side }}\n{{ \"Quantity:\" + \" \" + $json.qty }}\n{{ \"Placed at:\" + \" \" + $json.created_at }}",
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        -96,
-        352
-      ],
-      "id": "259f398c-5717-49bd-8e64-1993be3412e8",
-      "name": "Send a text message",
-      "webhookId": "4ef808ef-8594-4dd5-9ae6-26c2f489af4d",
-      "credentials": {
-        "telegramApi": {
-          "id": "KvHDot48Cxvpmj3G",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "operation": "append",
         "documentId": {
           "__rl": true,
@@ -512,6 +490,50 @@
         "googleSheetsOAuth2Api": {
           "id": "B74O1vS6ljHUhodt",
           "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7141060637",
+        "text": "={{ \"Dear Harsh Murjani,\" }}\n{{ \"Thank you for choosing NeuroTrade here is your trade summary.\" }}\n{{ \"Symbol:\" + \" \" + $json.symbol }} \n{{ \"Side:\" + \" \" + $json.side }}\n{{ \"Quantity:\" + \" \" + $json.qty }}\n{{ \"Placed at:\" + \" \" + $json.created_at }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        352
+      ],
+      "id": "259f398c-5717-49bd-8e64-1993be3412e8",
+      "name": "Harsh Message",
+      "webhookId": "4ef808ef-8594-4dd5-9ae6-26c2f489af4d",
+      "credentials": {
+        "telegramApi": {
+          "id": "KvHDot48Cxvpmj3G",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7410400473",
+        "text": "={{ \"Dear Vidhi Harwani,\" }}\n{{ \"Thank you for choosing NeuroTrade here is your trade summary.\" }}\n{{ \"Symbol:\" + \" \" + $json.symbol }} \n{{ \"Side:\" + \" \" + $json.side }}\n{{ \"Quantity:\" + \" \" + $json.qty }}\n{{ \"Placed at:\" + \" \" + $json.created_at }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        512
+      ],
+      "id": "ceec5c2d-1b11-47be-8a0d-e655a79ee48c",
+      "name": "Vidhi Message",
+      "webhookId": "4ef808ef-8594-4dd5-9ae6-26c2f489af4d",
+      "credentials": {
+        "telegramApi": {
+          "id": "KvHDot48Cxvpmj3G",
+          "name": "Telegram account"
         }
       }
     }
@@ -686,7 +708,12 @@
             "index": 0
           },
           {
-            "node": "Send a text message",
+            "node": "Harsh Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Vidhi Message",
             "type": "main",
             "index": 0
           }
@@ -698,7 +725,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "ce96d237-7543-44ed-8650-595def274249",
+  "versionId": "09ae465c-9217-4a33-9e88-d3a078a6fd2e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7e7d2b1057f5b6eb7d15a2d68b60cfd4ffbbcd0ea1e6f6366714fa6647466e53"
