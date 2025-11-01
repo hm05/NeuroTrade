@@ -57,11 +57,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This repository is licensed under the **MIT License** – see the [LICENSE](./LICENSE) file for details.  
 
-## Authors
+## Contributors
 
-- **hm05 (Harsh Murjani)**
-- **vdh05 (Vidhi Harwani)**
-- **dhruv230607 (Dhruv Prajapati)**
+<a href="https://github.com/hm05/NeuroTrade/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=hm05/NeuroTrade" />
+</a>
 
 ## Disclaimer
 
