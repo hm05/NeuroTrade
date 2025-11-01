@@ -536,6 +536,52 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "chatId": "5607668626",
+        "text": "={{ \"Dear Dhruv Prajapati,\" }}\n{{ \"Thank you for choosing NeuroTrade here is your trade summary.\" }}\n{{ \"Symbol:\" + \" \" + $json.symbol }} \n{{ \"Side:\" + \" \" + $json.side }}\n{{ \"Quantity:\" + \" \" + $json.qty }}\n{{ \"Placed at:\" + \" \" + $json.created_at }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        704
+      ],
+      "id": "85d77768-529c-48cf-8062-f19d2fc9c0c3",
+      "name": "Dhruv Message",
+      "webhookId": "4ef808ef-8594-4dd5-9ae6-26c2f489af4d",
+      "credentials": {
+        "telegramApi": {
+          "id": "KvHDot48Cxvpmj3G",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "neurotrade@harshmurjani.dev",
+        "toEmail": "22it079@charusat.edu.in, 22it037@charusat.edu.in, 22it126@charusat.edu.in",
+        "subject": "NeuroTrade Trade Summary",
+        "html": "=<p>Dear User,</p>\n<p>Thank you for choosing NeuroTrade. Here is your trade summary:</p>\n<p>\n<strong>Symbol:</strong> {{ $json.symbol }}<br>\n<strong>Side:</strong> {{ $json.side }}<br>\n<strong>Quantity:</strong> {{ $json.qty }}<br>\n<strong>Placed at:</strong> {{ new Date($json.created_at).toISOString().split('T')[0] }}\n</p>\n<p>Regards,<br>NeuroTrade</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        896
+      ],
+      "id": "6729680e-e776-4f3b-a02e-61fa4a956f14",
+      "name": "Send email",
+      "webhookId": "886e4194-70f3-4248-90b2-228532450203",
+      "credentials": {
+        "smtp": {
+          "id": "fTWyrgH4eiJKfrkV",
+          "name": "SMTP account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -716,6 +762,16 @@
             "node": "Vidhi Message",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Dhruv Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -725,7 +781,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "09ae465c-9217-4a33-9e88-d3a078a6fd2e",
+  "versionId": "67df82d3-7f8c-48ee-95ec-1a2f09ca1e46",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "7e7d2b1057f5b6eb7d15a2d68b60cfd4ffbbcd0ea1e6f6366714fa6647466e53"
